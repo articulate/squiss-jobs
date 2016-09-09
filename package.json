@@ -1,0 +1,19 @@
+{
+  "name": "squiss-jobs",
+  "version": "1.0.0",
+  "description": "SQS-backed job queue",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/articulate/squiss-jobs.git"
+  },
+  "author": "articulate",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/articulate/squiss-jobs/issues"
+  },
+  "homepage": "https://github.com/articulate/squiss-jobs#readme",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
