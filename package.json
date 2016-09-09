@@ -16,5 +16,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ramda": "^0.22.1",
+    "sqs-consumer": "^3.3.0",
+    "sqs-producer": "^1.3.4"
   }
 }
