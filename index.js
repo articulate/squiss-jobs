@@ -16,12 +16,12 @@ exports.create = ({ queueUrl }) => {
   const handle = (type, handler) =>
     handlers[type] = handler
 
-  const send = compose(deliver, message)
-
+  const on    = consumer.on.bind(consumer)
+  const send  = compose(deliver, message)
   const start = consumer.start.bind(consumer)
   const stop  = consumer.stop.bind(consumer)
 
-  return { handle, send, start, stop }
+  return { handle, on, send, start, stop }
 }
 
 exports.domainify = fn => (payload, done) => {
