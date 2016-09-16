@@ -9,22 +9,27 @@ exports.create = ({ queueUrl, region }) => {
   const handlers = {},
         handleMessage = parseFirst(handleWith(handlers)),
         consumer = Consumer.create({ handleMessage, queueUrl, region }),
-        producer = Producer.create({ queueUrl, region })
+        producer = Producer.create({ queueUrl, region }),
+        queue    = {}
 
   const dispatch = action => new Promise((res, rej) => {
     const message = { id: idgen(), body: stringify(action) }
-    producer.send([message], err => err ? rej(err) : res(action))
+    producer.send([message], err => err ? rej(err) : res(message))
   })
 
-  const handle = (type, handler) =>
-    handlers[type] = handler
+  const handle = (type, handler) => handlers[type] = handler
 
-  const on    = consumer.on.bind(consumer)
-  const send  = compose(dispatch, action)
-  const start = consumer.start.bind(consumer)
-  const stop  = consumer.stop.bind(consumer)
+  const on    = consumer.on.bind(consumer),
+        start = consumer.start.bind(consumer),
+        stop  = consumer.stop.bind(consumer)
 
-  return { handle, on, send, start, stop }
+  queue.handle = compose(always(queue), handle)
+  queue.on     = compose(always(queue), on)
+  queue.send   = compose(dispatch, action)
+  queue.start  = compose(always(queue), start)
+  queue.stop   = compose(always(queue), stop)
+
+  return queue
 }
 
 exports.domainify = fn => (payload, done) => {
