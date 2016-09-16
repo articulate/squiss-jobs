@@ -1,6 +1,6 @@
 {
   "name": "squiss-jobs",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "SQS-backed job queue",
   "repository": {
     "type": "git",
@@ -14,10 +14,9 @@
   "homepage": "https://github.com/articulate/squiss-jobs#readme",
   "bin": "./bin/squiss-jobs.sh",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "dependencies": {
+    "idgen": "^2.0.2",
     "ramda": "^0.22.1",
     "sqs-consumer": "^3.3.0",
     "sqs-producer": "^1.3.4"
