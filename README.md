@@ -27,7 +27,7 @@ SQS-backed job queue.
 - Object `queue` <br/>
   A queue instance.  See [Instance API](#instance-api).
 
-Note that `squiss-jobs` supplies its own `handleMessage` function to `sqs-consumer`, so any that you provide will be overridden.  Also, I recommend creating this once with your config and exporting it as a singleton.
+Creates a job queue instance.  Note that `squiss-jobs` supplies its own `handleMessage` function to `sqs-consumer`, so any that you provide will be overridden.  Also, I recommend creating this once with your config and exporting it as a singleton.
 
 ```js
 const squiss = require('squiss')
