@@ -2,10 +2,11 @@
 
 SQS-backed job queue.
 
-- [API](#api)
+- [Module API](#module-api)
 - [Instance API](#instance-api)
+- [CLI](#cli)
 
-## API
+## Module API
 
 - [squiss.create](#squisscreate)
 - [squiss.domainify](#squissdomainify)
@@ -222,3 +223,18 @@ None.
   The queue instance.
 
 Stops processing jobs.  Because every `start` needs a `stop`.  You can always start again with `queue.start()`.
+
+## CLI
+
+`squiss-jobs` ships with an executable script of the same name to help you create a personal dev job queue in SQS.  The queue name will be `${project-dirname}-jobs-${aws-username}`, and will have a `RedrivePolicy` pushing to a [deadletter queue](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/SQSDeadLetterQueue.html) after 3 job failures.
+
+To run the script, you can either install globally with `npm i -g squiss-jobs`, or install normally and include it in your `npm` scripts in the `package.json`.  After creating your queues, it will output the job queue URL for you to include in your ENV.
+
+```sh
+scotts-air:squiss-jobs scott$ squiss-jobs
+
+Copy the following into your .env file:
+JOBS_URI=https://queue.amazonaws.com/689543204258/squiss-jobs-jobs-smccormack
+```
+
+**Note:** The CLI only supports Mac OSX, and requires `brew`.  It will `brew install` both `jq` and `awscli` if not present, and then allow you to configure your AWS creds before continuing.
