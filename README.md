@@ -18,15 +18,15 @@ SQS-backed job queue.
 
 #### Parameters
 
-- Object `{ queueUrl, region }` <br/>
-  Options object.  `queueUrl` is your SQS job queue.  `region` defaults to `eu-west-1`.
+- Object `{ queueUrl, region, ... }` <br/>
+  Options object.  `queueUrl` is your SQS job queue.  `region` defaults to `eu-west-1`.  Other options are listed [here](https://www.npmjs.com/package/sqs-consumer#options).
 
 #### Returns
 
 - Object `queue` <br/>
   A queue instance.  See [Instance API](#instance-api).
 
-I recommend creating this once with your config and exporting it as a singleton.
+Note that `squiss-jobs` supplies its own `handleMessage` function to `sqs-consumer`, so any that you provide will be overridden.  Also, I recommend creating this once with your config and exporting it as a singleton.
 
 ```js
 const squiss = require('squiss')

@@ -2,14 +2,14 @@ const Consumer = require('sqs-consumer')
 const idgen    = require('idgen')
 const Producer = require('sqs-producer')
 
-const { compose } = require('ramda')
+const { always, compose, merge } = require('ramda')
 const { parse, stringify } = JSON
 
-exports.create = ({ queueUrl, region }) => {
+exports.create = options => {
   const handlers = {},
         handleMessage = parseFirst(handleWith(handlers)),
-        consumer = Consumer.create({ handleMessage, queueUrl, region }),
-        producer = Producer.create({ queueUrl, region }),
+        consumer = Consumer.create(merge(options, { handleMessage })),
+        producer = Producer.create(options),
         queue    = {}
 
   const dispatch = action => new Promise((res, rej) => {
