@@ -1,4 +1,4 @@
-# squiss-jobs
+# squiss-jobs [![npm version](https://img.shields.io/npm/v/@articulate/squiss-jobs.svg)](https://www.npmjs.com/package/@articulate/squiss-jobs)
 
 SQS-backed job queue.
 
