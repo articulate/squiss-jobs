@@ -30,7 +30,7 @@ SQS-backed job queue.
 Creates a job queue instance.  Note that `squiss-jobs` supplies its own `handleMessage` function to `sqs-consumer`, so any that you provide will be overridden.  Also, I recommend creating this once with your config and exporting it as a singleton.
 
 ```js
-const squiss = require('squiss-jobs')
+const squiss = require('@articulate/squiss-jobs')
 
 const queue = squiss.create({
   queueUrl: process.env.JOBS_URI,
@@ -59,7 +59,7 @@ module.exports = queue
 Avoids uncaught exceptions in async jobs by wrapping the job handler in a [domain](http://devdocs.io/node/domain#domain_class_domain).  The expected handler signature is the same as expected by [queue.handle]().
 
 ```js
-const squiss = require('squiss-jobs')
+const squiss = require('@articulate/squiss-jobs')
 const queue  = require('../lib/queue')
 
 const foo = (payload, done) => {
@@ -101,7 +101,7 @@ Registers a job handler for a specific job type.  If you register another handle
 Please note the expected handler signature.  The `payload` will have already been deserialized with `JSON.parse`.  To mark the job as complete, simply call `done()`.  Call `done(err)` with an `Error` to fail the job and leave it on the queue.
 
 ```js
-const squiss = require('squiss-jobs')
+const squiss = require('@articulate/squiss-jobs')
 const queue  = require('../lib/queue')
 
 const foo = (payload, done) => {
@@ -195,7 +195,7 @@ None.
 Starts pulling jobs off the queuing and processing them one-at-a-time.
 
 ```js
-const squiss = require('squiss-jobs')
+const squiss = require('@articulate/squiss-jobs')
 const queue  = require('../lib/queue')
 
 const jobs = require('require-dir')()
