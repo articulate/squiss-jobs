@@ -12,7 +12,7 @@
     "url": "https://github.com/articulate/squiss-jobs/issues"
   },
   "homepage": "https://github.com/articulate/squiss-jobs#readme",
-  "bin": "./bin/squiss-jobs.sh",
+  "bin": "./squiss-jobs.sh",
   "main": "index.js",
   "scripts": {},
   "dependencies": {
