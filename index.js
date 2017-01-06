@@ -18,16 +18,18 @@ exports.create = options => {
   })
 
   const handle = (type, handler) => handlers[type] = handler
+  const handleMany = jobs => Object.assign(handlers, jobs)
 
   const on    = consumer.on.bind(consumer),
         start = consumer.start.bind(consumer),
         stop  = consumer.stop.bind(consumer)
 
-  queue.handle = compose(always(queue), handle)
-  queue.on     = compose(always(queue), on)
-  queue.send   = compose(dispatch, action)
-  queue.start  = compose(always(queue), start)
-  queue.stop   = compose(always(queue), stop)
+  queue.handle     = compose(always(queue), handle)
+  queue.handleMany = compose(always(queue), handleMany)
+  queue.on         = compose(always(queue), on)
+  queue.send       = compose(dispatch, action)
+  queue.start      = compose(always(queue), start)
+  queue.stop       = compose(always(queue), stop)
 
   return queue
 }

@@ -73,6 +73,7 @@ queue.handle('foo', squiss.domainify(foo))
 ## Instance API
 
 - [queue.handle](#queuehandle)
+- [queue.handleMany](#queuehandlemany)
 - [queue.on](#queueon)
 - [queue.send](#queuesend)
 - [queue.start](#queuestart)
@@ -121,6 +122,38 @@ for (var type in jobs) {
   queue.handle(type, squiss.domainify(jobs[type]))
 }
 ```
+
+## queue.handleMany
+
+```haskell
+:: (Object) -> Object
+```
+
+#### Parameters
+
+- Object `jobs` <br/>
+  A map of job types to handlers
+
+#### Returns
+
+- Object `queue` <br/>
+  The queue instance.
+
+Similar to [queue.handle](#queuehandle), but registers multiple jobs in one shot.
+
+```js
+const squiss = require('@articulate/squiss-jobs')
+const queue  = require('../lib/queue')
+
+const foo = (payload, done) => {
+  console.log(payload)
+  done()
+}
+
+queue.handleMany('foo', { foo: squiss.domainify(foo) }))
+```
+
+You may also call `queue.handleMany` multiple times to register several sets of jobs.
 
 ## queue.on
 
