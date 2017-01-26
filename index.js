@@ -43,6 +43,6 @@ exports.domainify = fn => (payload, done) => {
 const action = (type, payload) => ({ type, payload })
 
 const handleWith = handlers => ({ type, payload }, done) =>
-  typeof handlers[type] === 'function' && handlers[type](payload, done)
+  typeof handlers[type] === 'function' ? handlers[type](payload, done) : done(new Error('No Handler registered for (' + type + ')'))
 
 const parseFirst = fn => (msg, done) => fn(parse(msg.Body), done)
