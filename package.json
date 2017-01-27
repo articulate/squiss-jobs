@@ -1,6 +1,6 @@
 {
   "name": "@articulate/squiss-jobs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SQS-backed job queue",
   "repository": {
     "type": "git",
