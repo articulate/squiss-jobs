@@ -1,6 +1,7 @@
 const Consumer = require('sqs-consumer')
 const idgen    = require('idgen')
 const Producer = require('sqs-producer')
+const debug    = require('debug')('squiss-jobs')
 
 const { always, compose, merge } = require('ramda')
 const { parse, stringify } = JSON
@@ -14,6 +15,7 @@ exports.create = options => {
 
   const dispatch = action => new Promise((res, rej) => {
     const message = { id: idgen(), body: stringify(action) }
+    debug('sending SQS message', stringify(message))
     producer.send([message], err => err ? rej(err) : res(message))
   })
 
