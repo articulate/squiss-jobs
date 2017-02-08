@@ -15,6 +15,8 @@ exports.create = opts => {
         options = compose(merge(defaults), dissoc('logger'))(opts),
         handlers = {}
 
+  const handleError = opts.handleError || debug
+
   const wrapWithTimeoutLogger = (fn, details) => (payload, done) => {
     const logTimeoutExceeded = () => logger(merge(details, { error: 'visibility timeout exceeded' })),
           timeout = setTimeout(logTimeoutExceeded, options.visibilityTimeout * 1000),
@@ -30,7 +32,7 @@ exports.create = opts => {
 
   const handleWith = ({ type, payload }, done) => {
     const handler = wrapWithTimeoutLogger(resolveHandler(type), merge(options, { type, payload }))
-    handler(payload, done)
+    handler(payload, done, handleError)
   }
 
   const handleMessage = parseFirst(handleWith),
@@ -67,5 +69,4 @@ exports.domainify = fn => (payload, done) => {
 }
 
 const action = (type, payload) => ({ type, payload })
-
-const parseFirst = fn => (msg, done) => fn(parse(msg.Body), done)
+const parseFirst = fn => (msg, done, error) => fn(parse(msg.Body), done, error)
