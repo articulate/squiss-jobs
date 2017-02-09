@@ -1,13 +1,39 @@
 const Consumer = require('sqs-consumer')
 const idgen    = require('idgen')
 const Producer = require('sqs-producer')
+const debug    = require('debug')('squiss-jobs')
 
-const { always, compose, merge } = require('ramda')
+const { always, compose, dissoc, merge, partial } = require('ramda')
 const { parse, stringify } = JSON
 
-exports.create = options => {
-  const handlers = {},
-        handleMessage = parseFirst(handleWith(handlers)),
+const defaults = {
+  visibilityTimeout: 30, // in seconds, SQS default
+}
+
+exports.create = opts => {
+  const logger = opts.logger || debug,
+        options = compose(merge(defaults), dissoc('logger'))(opts),
+        handlers = {}
+
+  const wrapWithTimeoutLogger = (fn, details) => (payload, done) => {
+    const logTimeoutExceeded = () => logger(merge(details, { error: 'visibility timeout exceeded' })),
+          timeout = setTimeout(logTimeoutExceeded, options.visibilityTimeout * 1000),
+          finish = compose(partial(clearTimeout, [timeout]), done)
+    fn(payload, finish)
+  }
+
+  const resolveHandler = (type) => {
+    return typeof handlers[type] === 'function'
+      ? handlers[type]
+      : (payload, done) => done(new Error(`No Handler registered for (${type})`))
+  }
+
+  const handleWith = ({ type, payload }, done) => {
+    const handler = wrapWithTimeoutLogger(resolveHandler(type), merge(options, { type, payload }))
+    handler(payload, done)
+  }
+
+  const handleMessage = parseFirst(handleWith),
         consumer = Consumer.create(merge(options, { handleMessage })),
         producer = Producer.create(options),
         queue    = {}
@@ -41,8 +67,5 @@ exports.domainify = fn => (payload, done) => {
 }
 
 const action = (type, payload) => ({ type, payload })
-
-const handleWith = handlers => ({ type, payload }, done) =>
-  typeof handlers[type] === 'function' ? handlers[type](payload, done) : done(new Error(`No Handler registered for (${type})`))
 
 const parseFirst = fn => (msg, done) => fn(parse(msg.Body), done)
