@@ -40,6 +40,7 @@ exports.create = opts => {
 
   const dispatch = action => new Promise((res, rej) => {
     const message = { id: idgen(), body: stringify(action) }
+    debug('sending SQS message', stringify(message))
     producer.send([message], err => err ? rej(err) : res(message))
   })
 
