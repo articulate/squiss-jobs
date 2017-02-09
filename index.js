@@ -14,8 +14,8 @@ exports.create = opts => {
   const logger = opts.logger || debug,
         options = compose(merge(defaults), dissoc('logger'))(opts)
 
-  const timeout = (fn) => (payload, done) => {
-    const logTimeoutExceeded = () => logger(merge(options, { error: 'visibility timeout exceeded' })),
+  const timeout = (fn, details) => (payload, done) => {
+    const logTimeoutExceeded = () => logger(merge(details, { error: 'visibility timeout exceeded' })),
           timeout = setTimeout(logTimeoutExceeded, options.visibilityTimeout * 1000),
           finish = compose(partial(clearTimeout, [timeout]), done)
     fn(payload, finish)
