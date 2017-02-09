@@ -22,12 +22,15 @@ exports.create = opts => {
     fn(payload, finish)
   }
 
-  const handleWith = ({ type, payload }, done) => {
-    const handler = typeof handlers[type] === 'function'
+  const resolveHandler = (type) => {
+    return typeof handlers[type] === 'function'
       ? handlers[type]
       : (payload, done) => done(new Error(`No Handler registered for (${type})`))
-    const wrappedHandler = wrapWithTimeoutLogger(handler, merge(options, { type, payload }))
-    wrappedHandler(payload, done)
+  }
+
+  const handleWith = ({ type, payload }, done) => {
+    const handler = wrapWithTimeoutLogger(resolveHandler(type), merge(options, { type, payload }))
+    handler(payload, done)
   }
 
   const handleMessage = parseFirst(handleWith),
