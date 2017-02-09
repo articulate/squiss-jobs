@@ -14,7 +14,7 @@ exports.create = opts => {
   const logger = opts.logger || debug,
         options = compose(merge(defaults), dissoc('logger'))(opts)
 
-  const timeout = (fn, details) => (payload, done) => {
+  const wrapWithTimeoutLogger = (fn, details) => (payload, done) => {
     const logTimeoutExceeded = () => logger(merge(details, { error: 'visibility timeout exceeded' })),
           timeout = setTimeout(logTimeoutExceeded, options.visibilityTimeout * 1000),
           finish = compose(partial(clearTimeout, [timeout]), done)
@@ -22,8 +22,11 @@ exports.create = opts => {
   }
 
   const handleWith = (handlers) => ({ type, payload }, done) => {
-    const handler = timeout(handlers[type], merge(options, { type, payload }))
-    typeof handler === 'function' ? handler(payload, done) : done(new Error(`No Handler registered for (${type})`))
+    const handler = typeof handlers[type] === 'function'
+      ? handlers[type]
+      : (payload, done) => done(new Error(`No Handler registered for (${type})`))
+    const wrappedHandler = wrapWithTimeoutLogger(handler, merge(options, { type, payload }))
+    wrappedHandler(payload, done)
   }
 
   const handlers = {},
