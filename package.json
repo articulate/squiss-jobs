@@ -16,6 +16,7 @@
   "main": "index.js",
   "scripts": {},
   "dependencies": {
+    "bluebird": "^3.4.7",
     "idgen": "^2.0.2",
     "ramda": "^0.22.1",
     "sqs-consumer": "^3.3.0",
