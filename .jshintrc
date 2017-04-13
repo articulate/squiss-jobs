@@ -1,0 +1,11 @@
+{
+  "asi": true,
+  "devel": true,
+  "esversion": 6,
+  "expr": true,
+  "laxbreak": true,
+  "mocha": true,
+  "node": true,
+  "undef": true,
+  "unused": true
+}
