@@ -5,10 +5,8 @@ SQS-backed job queue.
 ## Quick start guide
 
 ```js
-const squiss = require('squiss-jobs')
-
 // instantiate your queue
-const queue = squiss.create({
+const queue = require('squiss-jobs')({
   queueUrl: process.env.JOBS_URI,
   region:   process.env.AWS_REGION
 })
