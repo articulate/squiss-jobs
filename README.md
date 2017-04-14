@@ -30,8 +30,7 @@ queue.send('foo', { bar: 'baz' })
 
 ## v1 docs
 
-- [Module API](https://github.com/articulate/squiss-jobs/blob/master/docs/module-api.md)
-- [Instance API](https://github.com/articulate/squiss-jobs/blob/master/docs/instance-api.md)
-- [CLI](https://github.com/articulate/squiss-jobs/blob/master/docs/cli.md)
+- [API docs](https://github.com/articulate/squiss-jobs/blob/master/docs/api.md)
+- [CLI docs](https://github.com/articulate/squiss-jobs/blob/master/docs/cli.md)
 
-For `v0` docs, see the [original API](https://github.com/articulate/squiss-jobs/blob/f9690a36b4eafd962516236af9e1709efaa00e71/README.md)
+For `v0` docs, see the [original API](https://github.com/articulate/squiss-jobs/blob/f9690a36b4eafd962516236af9e1709efaa00e71/README.md).
