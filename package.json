@@ -1,5 +1,5 @@
 {
-  "name": "@articulate/squiss-jobs",
+  "name": "squiss-jobs",
   "version": "0.2.0",
   "description": "SQS-backed job queue",
   "repository": {
@@ -14,11 +14,17 @@
   "homepage": "https://github.com/articulate/squiss-jobs#readme",
   "bin": "./squiss-jobs.sh",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "hint": "jshint --reporter=node_modules/jshint-stylish ."
+  },
   "dependencies": {
-    "idgen": "^2.0.2",
-    "ramda": "^0.22.1",
-    "sqs-consumer": "^3.3.0",
-    "sqs-producer": "^1.3.4"
+    "ramda": "^0.23.0",
+    "sqs-consumer": "^3.5.0",
+    "sqs-producer": "^1.5.0",
+    "tinygen": "^0.2.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.9.4",
+    "jshint-stylish": "^2.2.1"
   }
 }
