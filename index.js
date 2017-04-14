@@ -1,71 +1,75 @@
 const Consumer = require('sqs-consumer')
-const idgen    = require('idgen')
 const Producer = require('sqs-producer')
-const debug    = require('debug')('squiss-jobs')
+const tinygen  = require('tinygen')
 
-const { always, compose, dissoc, merge, partial } = require('ramda')
+const {
+  always, bind, compose, curryN, dissoc, identity, merge,
+  mergeAll, nAry, partial
+} = require('ramda')
+
 const { parse, stringify } = JSON
 
-const defaults = {
-  visibilityTimeout: 30, // in seconds, SQS default
-}
+const defaults   = { visibilityTimeout: 30 },
+      timeoutErr = { error: 'visibility timeout exceeded' }
 
-exports.create = opts => {
-  const logger = opts.logger || debug,
-        options = compose(merge(defaults), dissoc('logger'))(opts),
+const action = (type, payload) => ({ type, payload })
+
+const clean = compose(merge(defaults), dissoc('timeoutLogger'))
+
+const missing = type => () =>
+  Promise.reject(new Error(`No handler registered for (${type})`))
+
+const parseFirst = fn => (msg, done) =>
+  fn(parse(msg.Body), done)
+
+module.exports = opts => {
+  const { timeoutLogger=identity, visibilityTimeout } = opts,
+        options  = clean(opts),
         handlers = {}
 
-  const wrapWithTimeoutLogger = (fn, details) => (payload, done) => {
-    const logTimeoutExceeded = () => logger(merge(details, { error: 'visibility timeout exceeded' })),
-          timeout = setTimeout(logTimeoutExceeded, options.visibilityTimeout * 1000),
-          finish = compose(partial(clearTimeout, [timeout]), done)
-    fn(payload, finish)
+  const dispatch = action =>
+    new Promise((res, rej) => {
+      const message = { id: tinygen(), body: stringify(action) }
+      producer.send([message], err => err ? rej(err) : res(message))
+    })
+
+  const handle = (type, handler) =>
+    handlers[type] = handler
+
+  const handleMany = jobs =>
+    Object.assign(handlers, jobs)
+
+  const handlerFor = type =>
+    typeof handlers[type] === 'function' ? handlers[type] : missing(type)
+
+  const processJob = ({ type, payload }, done) => {
+    const details    = mergeAll([ options, { type, payload }, timeoutErr ]),
+          logTimeout = partial(timeoutLogger, [ details ]),
+          timeout    = setTimeout(logTimeout, visibilityTimeout * 1000),
+          finish     = compose(partial(clearTimeout, [ timeout ]), done)
+
+    return Promise.resolve(payload)
+      .then(handlerFor(type))
+      .then(nAry(0, finish))
+      .catch(finish)
   }
 
-  const resolveHandler = (type) => {
-    return typeof handlers[type] === 'function'
-      ? handlers[type]
-      : (payload, done) => done(new Error(`No Handler registered for (${type})`))
-  }
+  const handleMessage = parseFirst(processJob)
 
-  const handleWith = ({ type, payload }, done) => {
-    const handler = wrapWithTimeoutLogger(resolveHandler(type), merge(options, { type, payload }))
-    handler(payload, done)
-  }
-
-  const handleMessage = parseFirst(handleWith),
-        consumer = Consumer.create(merge(options, { handleMessage })),
+  const consumer = Consumer.create(merge(options, { handleMessage })),
         producer = Producer.create(options),
         queue    = {}
 
-  const dispatch = action => new Promise((res, rej) => {
-    const message = { id: idgen(), body: stringify(action) }
-    producer.send([message], err => err ? rej(err) : res(message))
-  })
+  const on    = bind(consumer.on,    consumer),
+        start = bind(consumer.start, consumer),
+        stop  = bind(consumer.stop,  consumer)
 
-  const handle = (type, handler) => handlers[type] = handler
-  const handleMany = jobs => Object.assign(handlers, jobs)
-
-  const on    = consumer.on.bind(consumer),
-        start = consumer.start.bind(consumer),
-        stop  = consumer.stop.bind(consumer)
-
-  queue.handle     = compose(always(queue), handle)
+  queue.handle     = curryN(2, compose(always(queue), handle))
   queue.handleMany = compose(always(queue), handleMany)
-  queue.on         = compose(always(queue), on)
-  queue.send       = compose(dispatch, action)
+  queue.on         = curryN(2, compose(always(queue), on))
+  queue.send       = curryN(2, compose(dispatch, action))
   queue.start      = compose(always(queue), start)
   queue.stop       = compose(always(queue), stop)
 
   return queue
 }
-
-exports.domainify = fn => (payload, done) => {
-  const d = require('domain').create()
-  d.on('error', done)
-  d.run(fn, payload, done)
-}
-
-const action = (type, payload) => ({ type, payload })
-
-const parseFirst = fn => (msg, done) => fn(parse(msg.Body), done)

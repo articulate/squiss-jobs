@@ -2,7 +2,7 @@
 
 | Function | Signature |
 | -------- | --------- |
-| [squiss.create](#squisscreate) | `{ k: v } -> Queue` |
+| [squiss](#squiss) | `{ k: v } -> Queue` |
 | [queue.handle](#queuehandle) | `String -> (* -> Promise) -> Queue` |
 | [queue.handleMany](#queuehandlemany) | `{ k: (* -> Promise) } -> Queue` |
 | [queue.on](#queueon) | `String -> Function -> Queue` |
@@ -10,13 +10,13 @@
 | [queue.start](#queuestart) | `() -> Queue` |
 | [queue.stop](#queuestop) | `() -> Queue` |
 
-### squiss.create
+### squiss
 
 ```haskell
 { k: v } -> Queue
 ```
 
-Accepts an options object and returns a job queue instance.  Note that `squiss-jobs` supplies its own `handleMessage` function to `sqs-consumer`, so any that you provide will be overridden.  We recommend creating this once with your config and exporting it as a singleton.
+Accepts an options object and returns a job queue instance.  We recommend creating this once with your config and exporting it as a singleton.
 
 **Available options:**
 
@@ -24,19 +24,16 @@ Accepts an options object and returns a job queue instance.  Note that `squiss-j
 | ---- | ---- | ------- | ----------- |
 | `queueUrl` | `String` | | the SQS job queue url |
 | `region` | `String` | `eu-west-1` | the AWS region |
+| `timeoutLogger` | `Function` | | optional notifier for visibility timeouts |
 | `visibilityTimeout` | `Number` | `30` | message visibility time in seconds |
 
-Other options are listed [here](https://www.npmjs.com/package/sqs-consumer#options).
+Other options are listed [here](https://www.npmjs.com/package/sqs-consumer#options).  Note that `squiss-jobs` supplies its own `handleMessage` function to `sqs-consumer`, so any that you provide will be overridden.
 
 ```js
-const squiss = require('squiss-jobs')
-
-const queue = squiss.create({
+module.exports = require('squiss-jobs')({
   queueUrl: process.env.JOBS_URI,
   region:   process.env.AWS_REGION
 })
-
-module.exports = queue
 ```
 
 ### queue.handle
@@ -45,7 +42,7 @@ module.exports = queue
 String -> (* -> Promise) -> Queue
 ```
 
-Registers a job handler function for a specific job type.  If you register another handler for the same type, it will overwrite the first.  Returns the queue instance.
+Registers a job handler function for a specific job type.  If you register another handler for the same type, it will override the first.  Returns the queue instance.
 
 The handler will be passed a `payload` that has already been deserialized with `JSON.parse`.  If the handler returns a `Promise`, the job will be marked as completed when it resolves, or marked as failed when it is rejected.
 
