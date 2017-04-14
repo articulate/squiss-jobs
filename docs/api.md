@@ -3,10 +3,10 @@
 | Function | Signature |
 | -------- | --------- |
 | [squiss](#squiss) | `{ k: v } -> Queue` |
-| [queue.handle](#queuehandle) | `String -> (* -> Promise) -> Queue` |
-| [queue.handleMany](#queuehandlemany) | `{ k: (* -> Promise) } -> Queue` |
+| [queue.handle](#queuehandle) | `String -> (a -> Promise) -> Queue` |
+| [queue.handleMany](#queuehandlemany) | `{ k: (a -> Promise) } -> Queue` |
 | [queue.on](#queueon) | `String -> Function -> Queue` |
-| [queue.send](#queuesend) | `String -> * -> Promise` |
+| [queue.send](#queuesend) | `String -> a -> Promise` |
 | [queue.start](#queuestart) | `() -> Queue` |
 | [queue.stop](#queuestop) | `() -> Queue` |
 
@@ -39,7 +39,7 @@ module.exports = require('squiss-jobs')({
 ### queue.handle
 
 ```haskell
-String -> (* -> Promise) -> Queue
+String -> (a -> Promise) -> Queue
 ```
 
 Registers a job handler function for a specific job type.  If you register another handler for the same type, it will override the first.  Returns the queue instance.
@@ -70,7 +70,7 @@ for (var type in jobs) {
 ### queue.handleMany
 
 ```haskell
-{ k: (* -> Promise) } -> Queue
+{ k: (a -> Promise) } -> Queue
 ```
 
 Similar to [queue.handle](#queuehandle), but registers multiple jobs in one shot.  Returns the queue instance.
@@ -112,7 +112,7 @@ queue.on('processing_error', console.error)
 ### queue.send
 
 ```haskell
-String -> * -> Promise
+String -> a -> Promise
 ```
 
 Sends a job with `type` and `payload` onto the SQS queue.  The `payload` will be serialized with `JSON.stringify`, and a random `id` will be added to the message before sending into the queue.  Returns a `Promise` that resolves with the message sent through `sqs-producer`.
