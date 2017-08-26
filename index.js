@@ -4,7 +4,7 @@ const tinygen  = require('tinygen')
 
 const {
   always, bind, compose, curryN, dissoc, identity, merge,
-  mergeAll, nAry, partial
+  mergeAll, nAry, once, partial, tap
 } = require('ramda')
 
 const { parse, stringify } = JSON
@@ -42,11 +42,14 @@ module.exports = opts => {
   const handlerFor = type =>
     typeof handlers[type] === 'function' ? handlers[type] : missing(type)
 
-  const processJob = ({ type, payload }, done) => {
-    const details    = mergeAll([ options, { type, payload }, timeoutErr ]),
-          logTimeout = partial(timeoutLogger, [ details ]),
-          timeout    = setTimeout(logTimeout, visibilityTimeout * 1000),
-          finish     = compose(partial(clearTimeout, [ timeout ]), done)
+  const processJob = ({ type, payload }, callback) => {
+
+    const done          = once(callback)
+          details       = mergeAll([ options, { type, payload }, timeoutErr ]),
+          logTimeout    = partial(timeoutLogger, [ details ]),
+          handleTimeout = compose(partial(done, [ new Error(timeoutErr.error) ]), tap(logTimeout))
+          timeout       = setTimeout(handleTimeout, visibilityTimeout * 1000),
+          finish        = compose(tap(partial(clearTimeout, [ timeout ])), done)
 
     return Promise.resolve(payload)
       .then(handlerFor(type))
