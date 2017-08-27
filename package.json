@@ -1,6 +1,6 @@
 {
   "name": "squiss-jobs",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "SQS-backed job queue",
   "repository": {
     "type": "git",
