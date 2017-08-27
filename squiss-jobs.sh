@@ -10,13 +10,14 @@ fi
 
 username=$(aws iam get-user | jq -r '.User.UserName')
 
-deadName="${PWD##*/}-jobs-${username}-dead"
-jobsName="${PWD##*/}-jobs-${username}"
+defaultQueueName=${PWD##*/}
+queueName=${1-$defaultQueueName}
+deadName="${queueName}-jobs-${username}-dead"
+jobsName="${queueName}-jobs-${username}"
 
 deadUri=$(aws sqs create-queue --queue-name ${deadName} | jq -r '.QueueUrl')
 deadArn=$(aws sqs get-queue-attributes --queue-url ${deadUri} --attribute-names QueueArn | jq -r '.Attributes.QueueArn')
 
 jobsUri=$(aws sqs create-queue --queue-name ${jobsName} --attributes "{\"RedrivePolicy\":\"{\\\"deadLetterTargetArn\\\":\\\"${deadArn}\\\",\\\"maxReceiveCount\\\":\\\"3\\\"}\"}" | jq -r '.QueueUrl')
 
-echo "\nCopy the following into your .env file:"
-echo "JOBS_URI=${jobsUri}\n"
+echo "\nQueue available at: ${jobsUri}\n"
