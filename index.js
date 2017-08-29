@@ -2,10 +2,8 @@ const Consumer = require('sqs-consumer')
 const Producer = require('sqs-producer')
 const tinygen  = require('tinygen')
 
-const {
-  always, bind, compose, curryN, dissoc, identity, merge,
-  mergeAll, nAry, once, partial, tap
-} = require('ramda')
+const { always, bind, compose, curryN, dissoc, identity, is,
+        merge, mergeAll, nAry, once, partial, tap, when } = require('ramda')
 
 const { parse, stringify } = JSON
 
@@ -43,19 +41,30 @@ module.exports = opts => {
     typeof handlers[type] === 'function' ? handlers[type] : missing(type)
 
   const processJob = ({ type, payload }, callback) => {
-    const done    = once(callback)
+    const done = once(callback)
+
+    const addErrorContext = error => {
+      error.params = mergeAll([ options, { type, payload }, timeoutErr ])
+      error.component = 'squiss-jobs'
+      return error
+    }
+
+    const complete = error => {
+      const doneError = compose(done, when(is(Error), addErrorContext))
+      return arguments.length === 0
+        ? done()
+        : doneError(error)
+    }
 
     const handleTimeout = () => {
       const error = new Error(timeoutErr.error)
-      const params = mergeAll([ options, { type, payload }, timeoutErr ])
-      error.params = params
-      error.component = 'squiss-jobs'
+      addErrorContext(error)
       timeoutLogger(params)
-      done(error)
+      complete(error)
     }
 
     const timeout = setTimeout(handleTimeout, visibilityTimeout * 1000),
-          finish  = compose(tap(partial(clearTimeout, [ timeout ])), done)
+          finish  = compose(tap(partial(clearTimeout, [ timeout ])), complete)
 
     return Promise.resolve(payload)
       .then(handlerFor(type))
