@@ -43,13 +43,19 @@ module.exports = opts => {
     typeof handlers[type] === 'function' ? handlers[type] : missing(type)
 
   const processJob = ({ type, payload }, callback) => {
+    const done    = once(callback)
 
-    const done          = once(callback)
-          details       = mergeAll([ options, { type, payload }, timeoutErr ]),
-          logTimeout    = partial(timeoutLogger, [ details ]),
-          handleTimeout = compose(partial(done, [ new Error(timeoutErr.error) ]), tap(logTimeout))
-          timeout       = setTimeout(handleTimeout, visibilityTimeout * 1000),
-          finish        = compose(tap(partial(clearTimeout, [ timeout ])), done)
+    const handleTimeout = () => {
+      const error = new Error(timeoutErr.error)
+      const params = mergeAll([ options, { type, payload }, timeoutErr ])
+      error.params = params
+      error.component = 'squiss-jobs'
+      timeoutLogger(params)
+      done(error)
+    }
+
+    const timeout = setTimeout(handleTimeout, visibilityTimeout * 1000),
+          finish  = compose(tap(partial(clearTimeout, [ timeout ])), done)
 
     return Promise.resolve(payload)
       .then(handlerFor(type))
