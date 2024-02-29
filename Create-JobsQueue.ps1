@@ -15,7 +15,7 @@ $deadUri  = (aws sqs create-queue --queue-name $deadName | ConvertFrom-Json).Que
 $deadArn  = (aws sqs get-queue-attributes --queue-url $deadUri --attribute-names QueueArn | ConvertFrom-Json).Attributes.QueueArn
 
 $json = @"
-{\"RedrivePolicy\": \"{\\\"deadLetterTargetArn\\\":\\\"$deadArn\\\",\\\"maxReceiveCount\\\":\\\"3\\\"}\"}
+{\"RedrivePolicy\": \"{\\\"deadLetterTargetArn\\\":\\\"$deadArn\\\",\\\"maxReceiveCount\\\":\\\"3\\\",\\\"KmsMasterKeyId\\\":\\\"alias/aws/sqs\\\"}\"}
 "@
 
 $jobsUri  = (aws sqs create-queue --queue-name ${jobsName} --attributes $json | ConvertFrom-Json).QueueUrl

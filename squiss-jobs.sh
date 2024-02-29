@@ -18,6 +18,6 @@ jobsName="${queueName}-jobs-${username}"
 deadUri=$(aws sqs create-queue --queue-name ${deadName} | jq -r '.QueueUrl')
 deadArn=$(aws sqs get-queue-attributes --queue-url ${deadUri} --attribute-names QueueArn | jq -r '.Attributes.QueueArn')
 
-jobsUri=$(aws sqs create-queue --queue-name ${jobsName} --attributes "{\"RedrivePolicy\":\"{\\\"deadLetterTargetArn\\\":\\\"${deadArn}\\\",\\\"maxReceiveCount\\\":\\\"3\\\"}\"}" | jq -r '.QueueUrl')
+jobsUri=$(aws sqs create-queue --queue-name ${jobsName} --attributes "{\"RedrivePolicy\":\"{\\\"deadLetterTargetArn\\\":\\\"${deadArn}\\\",\\\"maxReceiveCount\\\":\\\"3\\\",\\\"KmsMasterKeyId\\\":\\\"alias/aws/sqs\\\"}\"}" | jq -r '.QueueUrl')
 
 echo "\nQueue available at: ${jobsUri}\n"
